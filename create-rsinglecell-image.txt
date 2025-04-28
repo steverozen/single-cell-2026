@@ -1,0 +1,13 @@
+mkdir rsinglecell
+cd rsinglecell
+vim Dockerfile
+# see the Dockerfile
+docker build -t rsinglecell .
+docker run -e PASSWORD=xx -p 8787:8787 rsinglecell &
+
+
+# experiment
+docker run -d \
+ -e PASSWORD=xx -p 8787:8787 \
+ -v /mnt/d/github2/single-cell-2025:/home/rstudio/repo \
+ rsinglecell 
