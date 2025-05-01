@@ -1,6 +1,6 @@
 # Run the "rsinglecell"" container on Windows
 
-(Need testers for these instructions)
+If you encounter problems please email Steve Rozen, [sr110@duke.edu](mailto:sr110@duke.edu) with a copy of the error message.
 
 ### IMPORTANT: you need admin rights on your PC for installing Docker Desktop
 
@@ -8,7 +8,7 @@
 
 Go to [Docker Desktop: The #1 Containerization Tool for Developers | Docker](https://www.docker.com/products/docker-desktop) and download and install Docker Desktop. Click the "Download Docker Desktop" button and the website will automatically detect that you're on Windows.
 
-Make sure to enable WSL 2 (Windows Subsystem for Linux) during the installation process, which will be recommended by the installer.
+Make sure to enable WSL 2 (Windows Subsystem for Linux) during the installation process, which will be recommended by the Docker Desktop installer.
 
 ## 2 Open WSL and get the "rsinglecell" Docker image
 
@@ -38,7 +38,7 @@ docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj steverozen/rsinglecell
 
 This will start an Rstudio server process in the background.
 
-## 4 Connect to the Rstudio server (Same for both WSL and Windows)
+## 4 Connect to the Rstudio server
 
 In your browser, open http://localhost:8787/
 

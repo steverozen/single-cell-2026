@@ -1,6 +1,6 @@
 # Run the "rsinglecell" container on a Mac
 
-(Need testers for these instructions)
+If you encounter problems please email Steve Rozen, sr110@duke.edu with a copy of the error message.
 
 ## 1 Download and install Docker Desktop
 
@@ -11,7 +11,7 @@ Go to [Docker Desktop: The #1 Containerization Tool for Developers | Docker](htt
 Use `Terminal` to download the Docker image, which contains an Rstudio server plus the R packages needed for the workshop:
 
 ```bash
-docker pull steverozen/rsinglecell
+docker pull --platform linux/amd64 steverozen/rsinglecell
 ```
 
 Check to see if rsinglecell got installed:
@@ -27,7 +27,7 @@ In `Terminal`, create a folder for the workshop information and change your work
 ```bash
 mkdir proj
 cd proj
-docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj singlecell
+docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj steverozen/rsinglecell
 ```
 
 This will start an Rstudio server process in the background
