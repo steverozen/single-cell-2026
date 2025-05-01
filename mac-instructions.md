@@ -27,7 +27,7 @@ In `Terminal`, create a folder for the workshop information and change your work
 ```bash
 mkdir proj
 cd proj
-docker run -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj singlecell &
+docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj singlecell
 ```
 
 This will start an Rstudio server process in the background
