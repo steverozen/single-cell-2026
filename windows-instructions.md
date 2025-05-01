@@ -14,9 +14,7 @@ Make sure to enable WSL 2 (Windows Subsystem for Linux) during the installation 
 
 You can open the WSL shell from the start menu.
 
-Open WSL
-
-Download l the Docker image:
+Open WSL and download the Docker image for the workshop:
 
 ```bash
 docker pull steverozen/rsinglecell
@@ -35,7 +33,7 @@ In your WSL terminal, create a folder for the workshop information and change yo
 ```bash
 mkdir proj
 cd proj
-docker run -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj steverozen/rsinglecell &
+docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj steverozen/rsinglecell
 ```
 
 This will start an Rstudio server process in the background.
