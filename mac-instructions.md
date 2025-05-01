@@ -1,4 +1,4 @@
-# Run rstudio container on Mac
+# Run the "rsinglecell" container on a Mac
 
 (Need testers for these instructions)
 

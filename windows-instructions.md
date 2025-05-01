@@ -1,6 +1,8 @@
-# Run rsinglecell container on Windows
+# Run "rsinglecell"" container on Windows
 
 (Need testers for these instructions)
+
+### IMPORTANT: you will need admin rights on your PC for installing Docker Desktop
 
 ## 1 Download and install Docker Desktop
 
