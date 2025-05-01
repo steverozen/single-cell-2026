@@ -8,7 +8,7 @@ Go to [Docker Desktop: The #1 Containerization Tool for Developers | Docker](htt
 
 ## 2 Open Terminal and get the Docker image for the workshop
 
-Download the Docker image that contains an Rstudio server plus the R packages needed for the workshop:
+Use `Terminal` to download the Docker image, which contains an Rstudio server plus the R packages needed for the workshop:
 
 ```bash
 docker pull steverozen/rsinglecell
@@ -22,7 +22,7 @@ docker images
 
 ## 3 Start the Docker image
 
-First, in Terminal create a folder for the workshop information and change your working directory there. We'll call the directory `proj`, but you can use any name without spaces.
+In `Terminal`, create a folder for the workshop information and change your working directory there. We'll call the directory `proj`, but you can use any name without spaces.
 
 ```bash
 mkdir proj
