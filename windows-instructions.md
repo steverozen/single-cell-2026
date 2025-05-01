@@ -48,4 +48,3 @@ Log in with:
 
 - Username: rstudio
 - Password: xx (the password you set in the docker run command)
-- 
