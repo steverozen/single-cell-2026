@@ -27,12 +27,12 @@ In `Terminal`, create a folder for the workshop information and change your work
 ```bash
 mkdir proj
 cd proj
-docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj steverozen/rsinglecell
+docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):/home/rstuio/proj steverozen/rsinglecell
 ```
 
 This will start an Rstudio server process in the background
 
-## Connect to the the Rstudio server
+## 4 Connect to the the Rstudio server
 
 In your broswer, open http://localhost:8787/. 
 

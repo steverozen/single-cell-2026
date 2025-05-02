@@ -24,6 +24,8 @@ Go to [Docker Desktop: The #1 Containerization Tool for Developers | Docker](htt
 
 You will probably have to restart again after installing Docker Desktop.
 
+Hopefully, at this point, Docker Desktop will be "integrated" with WSL, so that you can use docker commands inside WSL.
+
 ## 3 Open WSL and get the "rsinglecell" Docker image
 
 You can open WSL from the start menu.
@@ -47,7 +49,7 @@ In your WSL terminal, create a folder for the workshop information and change yo
 ```bash
 mkdir proj
 cd proj
-docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):/proj steverozen/rsinglecell
+docker run -d -e PASSWORD=xx -p 8787:8787 -v  steverozen/rsinglecell
 ```
 
 This will start an Rstudio server process in the background.
