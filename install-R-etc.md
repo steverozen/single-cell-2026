@@ -1,8 +1,10 @@
 # Install R, RStudio, and the Seurat R package
 
-### IMPORTANT: This make take over an hour. You must do this before the workshop
+### IMPORTANT: This may take over an hour. You must do this before the workshop
 
-Sent email to sr110@duke.edu if you have problems.  I will also check email over the weekend.
+Send email to sr110@duke.edu if you have problems.  I will also check email over the weekend.
+
+Please let me know if you find errors in these instructions.
 
 #### 1 If not already installed, install R from https://cloud.r-project.org/
 
