@@ -10,7 +10,7 @@ Please let me know if you find errors in these instructions.
 
 Select Download R for macOS or Windows (or Linux) depending on your computer's operating system.
 
-#### 2 If not already installed, install Rstudio from https://posit.co/download/rstudio-desktop/
+#### 2 If not already installed, install RStudio from https://posit.co/download/rstudio-desktop/
 
 Select choice "2: Install RStudio", assuming you already have R installed.
 
