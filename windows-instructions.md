@@ -1,6 +1,10 @@
-# Run the "rsinglecell"" Rstudio Docker container on Windows
+# Run the "rsinglecell"   Rstudio Docker container on Windows
 
 If you encounter problems please email Steve Rozen, [sr110@duke.edu](mailto:sr110@duke.edu) with a copy of the error message.
+
+I will check email over the weekend.
+
+Please le me know if you find errors in these instructions.
 
 ### IMPORTANT: you need admin rights on your PC for installing "Windows Subsystem Linux" (WSL) and Docker Desktop
 
@@ -49,10 +53,10 @@ In your WSL terminal, create a folder for the workshop information and change yo
 ```bash
 mkdir proj
 cd proj
-docker run -d -e PASSWORD=xx -p 8787:8787 -v  steverozen/rsinglecell
+docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):/home/rstudio/proj steverozen/rsinglecell
 ```
 
-This will start an Rstudio server process in the background.
+This will start an Rstudio server process in the background, and make your `proj` directory visible within the container a subfolder called `proj`.
 
 ## 4 Connect to the Rstudio server
 
@@ -64,3 +68,9 @@ Log in with:
 
 - Username: rstudio
 - Password: xx (the password you set in the docker run command)
+
+In the `Files` tab you should see a single folder, your `proj` folder. In the R `Console` tab, you should enter
+
+```r
+setwd('proj')
+```
