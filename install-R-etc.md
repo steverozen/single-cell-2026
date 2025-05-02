@@ -2,6 +2,8 @@
 
 ### IMPORTANT: This make take over an hour. You must do this before the workshop
 
+Sent email to sr110@duke.edu if you have problems.  I will also check email over the weekend.
+
 #### 1 If not already installed, install R from https://cloud.r-project.org/
 
 Select Download R for macOS or Windows (or Linux) depending on your computer's operating system.
