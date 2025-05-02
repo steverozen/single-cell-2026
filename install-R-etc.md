@@ -1,0 +1,17 @@
+# Install R, RStudio, and the Seurat R package
+
+### IMPORTANT: This make take over an hour. You must do this before the workshop
+
+#### 1 If not already installed, install R from https://cloud.r-project.org/
+
+Select Download R for macOS or Windows (or Linux) depending on your computer's operating system.
+
+#### 2 If not already installed, install Rstudio from https://posit.co/download/rstudio-desktop/
+
+Select choice "2: Install RStudio", assuming you already have R installed.
+
+#### 3 In RStudio, in the console window, enter the following R command:
+
+```r
+install.packages(c('dplyr', 'Seurat', 'patchwork'), repos='https://cran.rstudio.com/')
+```
