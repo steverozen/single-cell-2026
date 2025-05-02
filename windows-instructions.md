@@ -10,7 +10,13 @@ Documentation at [Install WSL | Microsoft Learn](https://learn.microsoft.com/en-
 
 The key is to run powershell in administrator mode, by typing the windows (start) key and then typing `powershell`, then right-click on the "Windows PowerShell" app and select "Run as administrator".
 
-*'Open PowerShell or Windows Command Prompt in **administrator** mode by right-clicking and selecting "Run as administrator", enter the wsl --install command, then restart your machine.'*
+In PowerShell, type:
+
+```cmd
+wsl --install
+```
+
+Then restart your machine.
 
 ## 2 Download and install Docker Desktop
 
@@ -41,7 +47,7 @@ In your WSL terminal, create a folder for the workshop information and change yo
 ```bash
 mkdir proj
 cd proj
-docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):proj steverozen/rsinglecell
+docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):/proj steverozen/rsinglecell
 ```
 
 This will start an Rstudio server process in the background.
