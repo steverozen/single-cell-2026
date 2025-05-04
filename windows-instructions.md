@@ -56,7 +56,7 @@ cd proj
 docker run -d -e PASSWORD=xx -p 8787:8787 -v $(pwd):/home/rstudio/proj steverozen/rsinglecell
 ```
 
-This will start an Rstudio server process in the background, and make your `proj` directory visible within the container a subfolder called `proj`.
+This will start an Rstudio server process in the background, and make your `proj` directory visible within the container in a subfolder called `proj`.
 
 ## 4 Connect to the Rstudio server
 
