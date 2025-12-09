@@ -34,6 +34,6 @@ remotes::install_github('immunogenomics/presto', upgrade='never')
 ```
 ```r
 install.packages('BiocManager')
-BiocManager::install('glmGamPoi') ### Slow!!
-
+BiocManager::install('glmGamPoi', update = FALSE)
 ```
+(Update = FALSE because otherwise very slow to update numerous dependencies)
