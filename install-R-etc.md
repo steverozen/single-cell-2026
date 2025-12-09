@@ -14,8 +14,13 @@ Select Download R for macOS or Windows (or Linux) depending on your computer's o
 
 Select choice "2: Install RStudio", assuming you already have R installed.
 
+##### You can also use Positron: https://posit.co/products/ide/positron/ or VS Code
+
+
 #### 3 In RStudio, in the console window, enter the following R command:
 
 ```r
 install.packages(c('dplyr', 'Seurat', 'patchwork'), repos='https://cran.rstudio.com/')
+
+
 ```
