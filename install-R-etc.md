@@ -2,7 +2,7 @@
 
 ### IMPORTANT: This may take over an hour. You must do this before the workshop
 
-Send email to sr110@duke.edu if you have problems.  I will also check email over the weekend.
+Send email to sr110@duke.edu if you have problems. 
 
 Please let me know if you find errors in these instructions.
 
