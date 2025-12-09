@@ -22,7 +22,7 @@ Select choice "2: Install RStudio", assuming you already have R installed.
 ```r
 install.packages(c('dplyr', 'Seurat', 'patchwork', 'sctransform'), repos='https://cran.rstudio.com/')
 ```
-**Important** you need Seurat v5.  If you already have Seurat installed. To check, do
+**Important** you need Seurat v5.  If you already have Seurat installed, to check, do
 ```r
 packageVersion("Seurat")
 
