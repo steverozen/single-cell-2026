@@ -14,7 +14,7 @@ Select Download R for macOS or Windows (or Linux) depending on your computer's o
 
 Select choice "2: Install RStudio", assuming you already have R installed.
 
-##### You can also use Positron: https://posit.co/products/ide/positron/ or VS Code
+##### If you prefer you can use Positron: https://posit.co/products/ide/positron/ or VS Code instead
 
 
 #### 3 In RStudio, in the console window, enter the following R command:
