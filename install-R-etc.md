@@ -21,9 +21,13 @@ Select choice "2: Install RStudio", assuming you already have R installed.
 
 ```r
 install.packages(c('dplyr', 'Seurat', 'patchwork', 'sctransform'), repos='https://cran.rstudio.com/')
-
+```
+**Important** you need Seurat v5.  If you already have Seurat installed. To check, do
+```r
+packageVersion("Seurat")
 
 ```
+
 ```r
 install.packages('remotes')
 remotes::install_github('immunogenomics/presto', upgrade='never')
