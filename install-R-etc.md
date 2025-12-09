@@ -1,4 +1,4 @@
-# Install R, RStudio, and the Seurat R package
+# Install R, the Seurat R package and other R packages, and RStudio or other IDE
 
 ### IMPORTANT: This may take over an hour. You must do this before the workshop
 
