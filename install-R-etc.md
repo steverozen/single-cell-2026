@@ -17,7 +17,7 @@ Select choice "2: Install RStudio", assuming you already have R installed.
 ##### If you prefer you can use Positron: https://posit.co/products/ide/positron/ or VS Code instead
 
 
-#### 3 In RStudio, in the console window, enter the following R command:
+#### 3 In RStudio (or other interactive development enironment), in an R cosole, enter the following R command:
 
 ```r
 install.packages(c('dplyr', 'Seurat', 'patchwork'), repos='https://cran.rstudio.com/')
