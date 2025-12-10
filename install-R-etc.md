@@ -10,7 +10,7 @@ Please let me know if you find errors in these instructions.
 
 Select Download R for macOS or Windows (or Linux) depending on your computer's operating system.
 
-##### 1.1 If R is intstalled, by version is < 4.5 I suggest you upgrade now using the instructions above
+#### 1.1 If R is intstalled, by version is < 4.5 I suggest you upgrade now using the instructions above
 
 To find your version of type `R.version.string` at the R prompt.
 
