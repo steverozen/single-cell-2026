@@ -28,6 +28,30 @@ packageVersion("Seurat")
 
 ```
 
+#### 4 Make sure you can load and run a test for each of these packages
+
+```r
+library(Seurat)
+pbmc_raw <- read.table(
+  file = system.file('extdata', 'pbmc_raw.txt', package = 'Seurat'),
+  as.is = TRUE
+)
+```
+```r
+library(dplyr)
+filter(starwars, species == "Human")
+```
+```r
+library(patchwork)
+library(ggplot2)
+p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp))
+p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear))
+
+p1 + p2
+
+```
+
+
 ```r
 install.packages('remotes')
 remotes::install_github('immunogenomics/presto', upgrade='never')
