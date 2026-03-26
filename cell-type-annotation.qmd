@@ -1,0 +1,462 @@
+---
+title: "Automated Cell Type Annotation: Comparing Azimuth, SingleR, and scType"
+subtitle: "Source: `cell-type-annotation.qmd`"
+author: "Steve Rozen (sr110@duke.edu, steverozen@pm.me)"
+date: last-modified
+date-format: "YYYY-MM-DD HH:mm"
+execute:
+  warning: false
+format:
+  html:
+    page-layout: full
+    include-in-header:
+      text: |
+        <style>
+          .quarto-container, .page-columns, .main-container {
+            max-width: 100% !important;
+          }
+        </style>
+---
+
+## Introduction
+
+Manual cell type annotation relies on expert knowledge of canonical markers and
+can be subjective. Automated methods offer reproducibility, speed, and the
+ability to leverage large reference datasets. This document compares three
+approaches on the PBMC3K dataset from the
+[clustering tutorial](pbmc3k-tutorial.html):
+
+- **Azimuth** — reference-mapping via Seurat's anchor-based transfer learning,
+  using a pre-built PBMC reference atlas
+- **SingleR** — correlation-based annotation against reference transcriptomes
+  of purified cell types
+- **scType** — marker-gene-based scoring using a curated database of cell type
+  markers
+
+## Setup
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+# Installation (run once, not part of this document):
+# install.packages("Azimuth", repos = "https://satijalab.r-universe.dev")
+# BiocManager::install(c("SingleR", "celldex", "SingleCellExperiment"))
+# install.packages("ggalluvial")
+# scType: no install needed (sourced from GitHub at runtime)
+
+library(Seurat)
+library(Azimuth)
+library(SingleR)
+library(celldex)
+library(SingleCellExperiment)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(ggalluvial)
+library(HGNChelper)
+
+base_size <- 14
+theme_set(theme_bw(base_size = base_size))
+```
+
+## Load Data
+
+Load the processed PBMC3K Seurat object from the clustering tutorial. This
+object has clusters 0--8, UMAP embedding, and manual cell type labels in
+`Idents()`.
+
+```{r}
+#| label: load-data
+pbmc <- readRDS(here::here("output", "pbmc3k_final.rds"))
+pbmc
+```
+
+Store the manual annotations in a dedicated metadata column so they are
+preserved when `Idents()` is overwritten by downstream methods.
+
+```{r}
+#| label: store-manual-labels
+pbmc$manual_annotation <- Idents(pbmc)
+knitr::kable(as.data.frame(table(CellType = pbmc$manual_annotation)),
+             row.names = FALSE)
+```
+
+## Method 1: Azimuth (Reference Mapping)
+
+Azimuth maps query cells onto a pre-built reference atlas (Hao et al. 2021)
+using anchor-based transfer learning. It provides hierarchical labels at two
+resolutions (L1 broad, L2 fine) along with prediction scores indicating
+annotation confidence.
+
+Note: the first run downloads the reference (~1.5 GB).
+
+```{r}
+#| label: azimuth-run
+#| message: false
+#| warning: false
+pbmc <- RunAzimuth(pbmc, reference = "pbmcref")
+```
+
+```{r}
+#| label: azimuth-explore
+head(pbmc@meta.data[, c("predicted.celltype.l1", "predicted.celltype.l2",
+                         "predicted.celltype.l1.score",
+                         "predicted.celltype.l2.score")])
+```
+
+### Prediction score distributions
+
+Higher scores indicate greater annotation confidence.
+
+```{r}
+#| label: azimuth-scores
+#| fig-width: 10
+#| fig-height: 4
+p1 <- ggplot(pbmc@meta.data, aes(x = predicted.celltype.l1.score)) +
+  geom_histogram(bins = 50) +
+  ggtitle("Azimuth L1 Prediction Scores")
+p2 <- ggplot(pbmc@meta.data, aes(x = predicted.celltype.l2.score)) +
+  geom_histogram(bins = 50) +
+  ggtitle("Azimuth L2 Prediction Scores")
+p1 + p2
+```
+
+### UMAP by Azimuth labels
+
+```{r}
+#| label: azimuth-umap
+#| fig-width: 14
+#| fig-height: 6
+p1 <- DimPlot(pbmc, group.by = "predicted.celltype.l1",
+              label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("Azimuth L1")
+p2 <- DimPlot(pbmc, group.by = "predicted.celltype.l2",
+              label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("Azimuth L2")
+p1 + p2
+```
+
+## Method 2: SingleR (Reference Correlation)
+
+SingleR correlates each cell's expression profile against reference datasets
+of purified cell types. We use the Monaco Immune Data reference, which
+provides both broad (`label.main`) and fine-grained (`label.fine`)
+annotations for immune cells.
+
+```{r}
+#| label: singler-reference
+#| message: false
+monaco_ref <- MonacoImmuneData()
+```
+
+Convert the Seurat object to SingleCellExperiment format for SingleR input.
+
+```{r}
+#| label: singler-convert
+#| warning: false
+# SeuratObject/alabaster.base S4 class cache and reddim_names warnings are
+# harmless artifacts of the Seurat-to-SCE conversion
+sce <- as.SingleCellExperiment(pbmc)
+```
+
+```{r}
+#| label: singler-run
+#| message: false
+#| warning: false
+singler_main <- SingleR(
+  test   = sce,
+  ref    = monaco_ref,
+  labels = monaco_ref$label.main
+)
+
+singler_fine <- SingleR(
+  test   = sce,
+  ref    = monaco_ref,
+  labels = monaco_ref$label.fine
+)
+```
+
+```{r}
+#| label: singler-add-metadata
+pbmc$singler_monaco_main <- singler_main$labels
+pbmc$singler_monaco_fine <- singler_fine$labels
+```
+
+### Annotation confidence
+
+SingleR prunes low-confidence assignments (setting them to `NA`).
+
+```{r}
+#| label: singler-diagnostics
+data.frame(
+  Level = c("Main", "Fine"),
+  `Pruned cells` = c(sum(is.na(singler_main$pruned.labels)),
+                      sum(is.na(singler_fine$pruned.labels))),
+  check.names = FALSE
+) |> knitr::kable(row.names = FALSE)
+```
+
+### UMAP by SingleR labels
+
+```{r}
+#| label: singler-umap
+#| fig-width: 14
+#| fig-height: 6
+p1 <- DimPlot(pbmc, group.by = "singler_monaco_main",
+              label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("SingleR (Monaco, main)")
+p2 <- DimPlot(pbmc, group.by = "singler_monaco_fine",
+              label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("SingleR (Monaco, fine)")
+p1 + p2
+```
+
+## Method 3: scType (Marker-Gene Scoring)
+
+scType scores cells using a curated marker gene database without needing a
+reference expression dataset. Unlike Azimuth and SingleR (which annotate
+per cell), scType assigns one label per cluster.
+
+```{r}
+#| label: sctype-source
+#| message: false
+source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R")
+source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R")
+```
+
+```{r}
+#| label: sctype-db
+#| warning: false
+# checkGeneSymbols warns about non-standard gene symbol casing in the scType DB
+db_url <- paste0(
+  "https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/",
+  "master/ScTypeDB_full.xlsx"
+)
+tissue_type <- "Immune system"
+gs_list <- gene_sets_prepare(db_url, tissue_type)
+```
+
+```{r}
+#| label: sctype-score
+DefaultAssay(pbmc) <- "RNA"
+
+es_max <- sctype_score(
+  scRNAseqData = pbmc[["RNA"]]$scale.data,
+  gs  = gs_list$gs_positive,
+  gs2 = gs_list$gs_negative
+)
+
+# Aggregate scores per cluster and pick the top-scoring cell type
+cL_results <- do.call("rbind", lapply(
+  levels(pbmc$seurat_clusters),
+  function(cl) {
+    es_cl <- sort(
+      rowSums(es_max[, rownames(pbmc@meta.data[pbmc$seurat_clusters == cl, ])]),
+      decreasing = TRUE
+    )
+    head(data.frame(
+      cluster = cl,
+      type    = names(es_cl),
+      score   = es_cl,
+      ncells  = sum(pbmc$seurat_clusters == cl)
+    ), 3)
+  }
+))
+
+sctype_labels <- cL_results |>
+  group_by(cluster) |>
+  dplyr::filter(score == max(score)) |>
+  arrange(as.integer(as.character(cluster)))
+
+knitr::kable(sctype_labels, row.names = FALSE, digits = 1)
+```
+
+```{r}
+#| label: sctype-add-metadata
+pbmc$sctype_annotation <- sctype_labels$type[
+  match(pbmc$seurat_clusters, sctype_labels$cluster)
+]
+```
+
+### UMAP by scType labels
+
+```{r}
+#| label: sctype-umap
+#| fig-width: 10
+#| fig-height: 7
+DimPlot(pbmc, group.by = "sctype_annotation",
+        label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("scType")
+```
+
+## Comparison of Methods
+
+### Side-by-side UMAPs
+
+```{r}
+#| label: comparison-umap-grid
+#| fig-width: 14
+#| fig-height: 12
+p_manual  <- DimPlot(pbmc, group.by = "manual_annotation",
+                     label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("Manual Annotation")
+p_azimuth <- DimPlot(pbmc, group.by = "predicted.celltype.l1",
+                     label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("Azimuth L1")
+p_singler <- DimPlot(pbmc, group.by = "singler_monaco_main",
+                     label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("SingleR (Monaco)")
+p_sctype  <- DimPlot(pbmc, group.by = "sctype_annotation",
+                     label = TRUE, repel = TRUE) +
+  NoLegend() + ggtitle("scType")
+
+(p_manual + p_azimuth) / (p_singler + p_sctype)
+```
+
+### Cross-tabulations
+
+#### Manual vs. Azimuth L1
+
+```{r}
+#| label: cross-tab-azimuth
+knitr::kable(
+  as.data.frame.matrix(table(
+    Manual = pbmc$manual_annotation,
+    Azimuth = pbmc$predicted.celltype.l1
+  ))
+)
+```
+
+#### Manual vs. SingleR (Monaco, main)
+
+```{r}
+#| label: cross-tab-singler
+knitr::kable(
+  as.data.frame.matrix(table(
+    Manual = pbmc$manual_annotation,
+    SingleR = pbmc$singler_monaco_main
+  ))
+)
+```
+
+#### Manual vs. scType
+
+```{r}
+#| label: cross-tab-sctype
+knitr::kable(
+  as.data.frame.matrix(table(
+    Manual = pbmc$manual_annotation,
+    scType = pbmc$sctype_annotation
+  ))
+)
+```
+
+### Proportional heatmap (Manual vs. Azimuth)
+
+```{r}
+#| label: agreement-heatmap
+#| fig-width: 10
+#| fig-height: 7
+cross_df <- as.data.frame(table(
+  Manual  = pbmc$manual_annotation,
+  Azimuth = pbmc$predicted.celltype.l1
+))
+
+cross_df <- cross_df |>
+  group_by(Manual) |>
+  mutate(Proportion = Freq / sum(Freq))
+
+ggplot(cross_df, aes(x = Azimuth, y = Manual, fill = Proportion)) +
+  geom_tile() +
+  geom_text(aes(label = Freq),
+            size = 0.7 * base_size / ggplot2::.pt) +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = rel(0.8))) +
+  ggtitle("Manual vs. Azimuth L1 Agreement")
+```
+
+### Alluvial plot
+
+This shows how cells flow between annotation schemes. Only flows with
+`r 5` or more cells are shown for readability.
+
+```{r}
+#| label: alluvial-plot
+#| fig-width: 12
+#| fig-height: 8
+#| warning: false
+annotation_df <- data.frame(
+  Manual  = as.character(pbmc$manual_annotation),
+  Azimuth = as.character(pbmc$predicted.celltype.l1),
+  SingleR = as.character(pbmc$singler_monaco_main)
+)
+
+alluvial_df <- annotation_df |>
+  dplyr::count(Manual, Azimuth, SingleR) |>
+  dplyr::filter(n >= 5)
+
+ggplot(alluvial_df,
+       aes(axis1 = Manual, axis2 = Azimuth, axis3 = SingleR, y = n)) +
+  geom_alluvium(aes(fill = Manual), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "grey90", color = "grey50") +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum)),
+            size = 0.55 * base_size / ggplot2::.pt) +
+  scale_x_discrete(limits = c("Manual", "Azimuth", "SingleR")) +
+  theme(legend.position = "none") +
+  ggtitle("Cell Type Label Flow Across Methods")
+```
+
+## Discussion
+
+All three methods largely agree on the major PBMC cell types (T cells,
+monocytes, B cells, NK cells), which is expected for a well-characterized
+tissue with abundant reference data.
+
+Key differences between the methods:
+
+- **Azimuth** provides hierarchical labels (L1/L2) and prediction scores,
+  making it easy to assess confidence. It requires a matching reference atlas,
+  which limits applicability to tissues with available references.
+
+- **SingleR** annotates per-cell against bulk reference transcriptomes,
+  offering broad reference coverage via `celldex`. It provides pruning of
+  low-confidence assignments. Results are sensitive to the choice of reference
+  dataset.
+
+- **scType** uses marker gene databases and assigns one label per cluster
+  (not per cell). It is transparent and interpretable but depends on the
+  quality of the marker database and inherits the granularity of the
+  upstream clustering.
+
+For novel or poorly characterized tissues where reference atlases are
+unavailable, SingleR with a broad reference or scType with custom marker
+lists may be the only viable automated options.
+
+## Save Annotated Object
+
+```{r}
+#| label: save-annotated
+saveRDS(pbmc, file = here::here("output", "pbmc3k_annotated.rds"))
+```
+
+## References
+
+- Hao Y et al. (2024) "Dictionary learning for integrative, multimodal and scalable single-cell analysis." *Nat Biotechnol* 42:293--304. <https://doi.org/10.1038/s41587-023-01767-y>
+- Hao Y et al. (2021) "Integrated analysis of multimodal single-cell data." *Cell* 184:3573--3587. <https://doi.org/10.1016/j.cell.2021.04.048>
+- Aran D et al. (2019) "Reference-based analysis of lung single-cell sequencing reveals a transitional profibrotic macrophage." *Nat Immunol* 20:163--172. <https://doi.org/10.1038/s41590-018-0276-y>
+- Monaco G et al. (2019) "RNA-Seq Signatures Normalized by mRNA Abundance Allow Absolute Deconvolution of Human Immune Cell Types." *Cell Rep* 26:1627--1640. <https://doi.org/10.1016/j.celrep.2019.01.041>
+- Ianevski A, Giri AK, Aittokallio T (2022) "Fully-automated and ultra-fast cell-type identification using specific marker combinations from single-cell transcriptomic data." *Nat Commun* 13:1246. <https://doi.org/10.1038/s41467-022-28803-w>
+
+::: {.callout-note collapse="true"}
+## Session Info
+
+```{r}
+#| label: session-info
+#| echo: false
+#| comment: ""
+sessioninfo::session_info(info = "all")
+```
+
+:::

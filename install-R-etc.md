@@ -85,3 +85,11 @@ install.packages('BiocManager')
 BiocManager::install('glmGamPoi', update = FALSE)
 ```
 (Update = FALSE because otherwise very slow to update numerous dependencies)
+
+#### 6 Install packages for automated cell type annotation (used in cell-type-annotation.qmd)
+
+```r
+install.packages('Azimuth', repos = 'https://satijalab.r-universe.dev')
+BiocManager::install(c('SingleR', 'celldex', 'SingleCellExperiment'), update = FALSE)
+install.packages('ggalluvial')
+```
